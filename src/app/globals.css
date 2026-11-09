@@ -1,26 +1,370 @@
 @import "tailwindcss";
 
+/* ==================================================================
+ * Atelier design system
+ *
+ * Principles: a monochrome palette with product imagery as the only
+ * color. One sans family with small, slightly tight text. Uppercase
+ * bold for labels and actions. Square corners, 1px hairlines,
+ * edge-to-edge media and grids, and generous fluid gutters.
+ * ================================================================== */
+
+/* Raw color values. Components use the Tailwind names from @theme. */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --foreground: #0a0a0a;
+  --surface: #f8f8f7; /* image wells, product cards, placeholders */
+  --muted-foreground: #737373; /* inactive tabs, meta, secondary copy */
+  --border: #e6e6e6; /* hairline dividers */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #f5f5f4;
+    --surface: #161616;
+    --muted-foreground: #9a9a9a;
+    --border: #2a2a2a;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  /* Type scale. Product copy stays small; display is large and light. */
+  --text-caption: 0.6875rem; /* 11px: badges, breadcrumbs, legal */
+  --text-caption--line-height: 1rem;
+
+  --text-label: 0.75rem; /* 12px: buttons, nav, eyebrows (uppercase) */
+  --text-label--line-height: 1rem;
+  --text-label--letter-spacing: 0.04em;
+  --text-label--font-weight: 700;
+
+  --text-body: 0.8125rem; /* 13px: product names, prices, UI copy */
+  --text-body--line-height: 1.25rem;
+  --text-body--letter-spacing: -0.01em;
+
+  --text-lead: 1rem; /* 16px: intros, section headings */
+  --text-lead--line-height: 1.5rem;
+  --text-lead--letter-spacing: -0.02em;
+
+  --text-headline: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  --text-headline--line-height: 1.15;
+  --text-headline--letter-spacing: -0.03em;
+  --text-headline--font-weight: 300;
+
+  --text-display: clamp(2.25rem, 1.2rem + 4.5vw, 5rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.04em;
+  --text-display--font-weight: 300;
+
+  --tracking-wordmark: 0.24em;
+
+  /* Spacing. Gutter: 16px on phones, 64px on desktop. */
+  --spacing-gutter: clamp(1rem, 4.5vw, 4rem);
+  --spacing-section: clamp(3rem, 2rem + 5vw, 7.5rem);
+  --spacing-header: 3.5rem; /* 56px; 72px from md, set below */
+  --spacing-control: 3rem; /* 48px: buttons, inputs, tap targets */
+
+  /* Containers */
+  --container-page: 90rem; /* 1440px content cap; grids and media bleed */
+  --container-prose: 40rem;
+
+  /* Motion: quick and quiet. */
+  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ==================================================================
+ * Base
+ * ================================================================== */
+@layer base {
+  :root {
+    @variant md {
+      --spacing-header: 4.5rem;
+    }
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-padding-top: var(--spacing-header);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  :focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+/* ==================================================================
+ * Layout primitives
+ * ================================================================== */
+
+/* Capped, centered content column with fluid gutters. */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Full-width row that keeps the gutters (toolbars, sub-nav). */
+@utility container-bleed {
+  width: 100%;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility section-y {
+  padding-block: var(--spacing-section);
+}
+
+/* Edge-to-edge product grid: 2 / 3 / 4 columns with hairline gaps, so
+   the image wells read as one continuous surface. */
+@utility product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+
+  @variant md {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+  }
+  @variant lg {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Editorial tile that takes two grid columns (from md up). */
+@utility grid-feature {
+  grid-column: span 2 / span 2;
+}
+
+/* Image well: surface background, 3:4 ratio, media fills it.
+   Product shots: add `object-contain p-[8%]` to the img; campaign
+   imagery keeps the default cover fit. */
+@utility media-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  aspect-ratio: 3 / 4;
+
+  & > img,
+  & > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Full-bleed hero media: near full-viewport height under the header. */
+@utility media-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  min-height: min(90svh, 56rem);
+
+  & > img,
+  & > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Horizontal scroll row for category tabs and filters on small screens. */
+@utility scroll-row {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Product card copy: inset text under the image. */
+@utility card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+/* ==================================================================
+ * Typography primitives
+ * ================================================================== */
+
+/* Uppercase bold label for nav, eyebrows, section titles and active tabs. */
+@utility eyebrow {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  text-transform: uppercase;
+}
+
+@utility wordmark {
+  font-size: 1.375rem;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: var(--tracking-wordmark);
+  text-transform: uppercase;
+  /* Cancel trailing tracking so the word centers optically. */
+  margin-right: calc(var(--tracking-wordmark) * -1);
+
+  @variant md {
+    font-size: 1.75rem;
+  }
+}
+
+/* Prices: medium weight with tabular figures. */
+@utility price {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==================================================================
+ * Links
+ * ================================================================== */
+
+/* Inline text link: 1px underline that steps back on hover. */
+@utility link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: opacity var(--default-transition-duration)
+    var(--ease-out-soft);
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
+
+/* Tab / nav link: muted at rest; current page turns bold uppercase. */
+@utility link-tab {
+  color: var(--color-muted-foreground);
+  transition: color var(--default-transition-duration) var(--ease-out-soft);
+
+  &:hover {
+    color: var(--color-foreground);
+  }
+  &[aria-current="page"] {
+    color: var(--color-foreground);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--text-label--letter-spacing);
+  }
+}
+
+/* ==================================================================
+ * Buttons: square, 48px tall, uppercase bold. Use `btn` + one variant.
+ * ================================================================== */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--spacing-control);
+  padding: 1rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: background-color, color, border-color, opacity;
+  transition-duration: var(--default-transition-duration);
+  transition-timing-function: var(--ease-out-soft);
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+/* Solid: the single main action in a view. */
+@utility btn-primary {
+  background: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+/* Outline: secondary actions. Fills on hover. */
+@utility btn-secondary {
+  background: transparent;
+  color: var(--color-foreground);
+  border-color: var(--color-foreground);
+
+  &:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+}
+
+/* Light solid button over dark imagery (hero CTAs). Fixed colors on
+   purpose: it sits on photos, not on the page background. */
+@utility btn-on-media {
+  background: #ffffff;
+  color: #0a0a0a;
+  border-color: #ffffff;
+
+  &:hover {
+    background: transparent;
+    color: #ffffff;
+  }
+}
+
+@utility btn-block {
+  width: 100%;
 }
